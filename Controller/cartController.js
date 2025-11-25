@@ -1,15 +1,13 @@
 const Cart = require("../Models/cartmodule");
 const Product = require("../Models/ProductModule");
 
-// ADD PRODUCT TO CART
+// ADD TO CART
 exports.addToCart = async (req, res) => {
   try {
     const { productId } = req.body;
 
     const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
     let cart = await Cart.findOne();
 
@@ -30,38 +28,39 @@ exports.addToCart = async (req, res) => {
     }
 
     await cart.save();
-
     res.status(200).json({ message: "Added to cart", cart });
 
   } catch (error) {
-    res.status(500).json({ message: "Add to cart failed", error });
+    console.error("Add to cart error:", error.message);
+    res.status(500).json({ message: "Add to cart failed", error: error.message });
   }
 };
 
 // GET CART ITEMS
-// GET CART ITEMS (Safe)
 exports.getCartItems = async (req, res) => {
   try {
-    // Fetch cart
-    const cart = await Cart.findOne().populate("items.product");
+    const cart = await Cart.findOne().populate({
+      path: "items.product",
+      model: "Product"
+    });
 
     if (!cart) return res.status(200).json({ items: [] });
 
-    // Remove any items whose product no longer exists
-    const validItems = cart.items.filter(item => item.product);
+    // Only keep valid items with populated product
+    const validItems = cart.items.filter(item => item.product?._id);
 
     res.status(200).json({ items: validItems });
+
   } catch (error) {
     console.error("Cart load error:", error.message);
     res.status(500).json({ message: "Failed to load cart", error: error.message });
   }
 };
 
-
-// UPDATE QUANTITY
+// UPDATE CART ITEM
 exports.updateCartItem = async (req, res) => {
   try {
-    const { _id } = req.params;
+    const { _id } = req.params; // Cart item _id
     const { quantity } = req.body;
 
     const cart = await Cart.findOne();
@@ -70,17 +69,18 @@ exports.updateCartItem = async (req, res) => {
     const item = cart.items.id(_id);
     if (!item) return res.status(404).json({ message: "Item not found" });
 
-    item.quantity = quantity;
+    item.quantity = quantity < 1 ? 1 : quantity; // prevent <1
     await cart.save();
 
     res.status(200).json({ message: "Quantity updated", item });
 
   } catch (error) {
-    res.status(500).json({ message: "Update failed", error });
+    console.error("Update error:", error.message);
+    res.status(500).json({ message: "Update failed", error: error.message });
   }
 };
 
-// DELETE ITEM
+// DELETE CART ITEM
 exports.deleteCartItem = async (req, res) => {
   try {
     const { _id } = req.params;
@@ -88,13 +88,13 @@ exports.deleteCartItem = async (req, res) => {
     const cart = await Cart.findOne();
     if (!cart) return res.status(404).json({ message: "Cart empty" });
 
-    cart.items = cart.items.filter((item) => item._id.toString() !== _id);
-
+    cart.items = cart.items.filter(item => item._id.toString() !== _id);
     await cart.save();
 
-    res.status(200).json({ message: "Deleted" });
+    res.status(200).json({ message: "Item deleted" });
 
   } catch (error) {
-    res.status(500).json({ message: "Delete failed", error });
+    console.error("Delete error:", error.message);
+    res.status(500).json({ message: "Delete failed", error: error.message });
   }
 };
