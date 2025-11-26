@@ -11,4 +11,4 @@ route.delete("/:_id",pc.deleteproduct);
 route.get("/:_id",pc.getproductById);
 route.get("/getcategory/:category",pc.getproductByCategory)
 
- module.exports = route;
+ module.exports = route;
