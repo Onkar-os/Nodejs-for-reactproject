@@ -8,8 +8,8 @@ const productSchema = new mongoose.Schema({
     category :{type:String,required:true},
     stock :{type:Boolean,required:true},
    orderDate: { type: Date, default: Date.now },
-    image:{ type: String ,required:true},
-    description :{type:String,required:true}
+   images: [{type: String, required: true}],    
+  description :{type:String,required:true}
 
 })
 

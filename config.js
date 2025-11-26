@@ -1,18 +1,14 @@
-const mongoose = require('mongoose');
+// config.js
+const mongoose = require("mongoose");
 
-
-const connect = async()=>{
-    
-  try
-  {
-    mongoose.connect('mongodb://127.0.0.1:27017/test')
-    .then(() => console.log('Connected!'));
+const connectDB = async () => {
+  try {
+    await mongoose.connect("mongodb://127.0.0.1:27017/test");
+    console.log("✅ MongoDB connected");
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
   }
-  catch(error)
-  {
-    console.log("somthing went wrong...");
-  }
-}
+};
 
-
-module.exports = connect
+module.exports = connectDB;
