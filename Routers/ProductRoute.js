@@ -1,16 +1,24 @@
 const express = require('express');
 const route = express.Router();
 const pc = require('../Controller/ProductContoller');
-const verifyAdmin = require("../middleware/verifyAdmin"); // added for admin routes
+const verifyAdmin = require("../Middleware/verifyAdmin");
 
-// Admin protected routes
+// CREATE (admin)
 route.post("/", verifyAdmin, pc.addproduct);
-route.put("/:_id", verifyAdmin, pc.updateproduct);
-route.delete("/:_id", verifyAdmin, pc.deleteproduct);
 
-// Public routes
+// READ ALL
 route.get("/", pc.getproducts);
-route.get("/:_id", pc.getproductById);
-route.get("/getcategory/:category", pc.getproductByCategory);
+
+// CATEGORY
+route.get("/category/:category", pc.getproductByCategory);
+
+// READ ONE BY ID
+route.get("/:id", pc.getproductById);
+
+// UPDATE (admin)
+route.put("/:id", verifyAdmin, pc.updateproduct);
+
+// DELETE (admin)
+route.delete("/:id", verifyAdmin, pc.deleteproduct);
 
 module.exports = route;
