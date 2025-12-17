@@ -1,15 +1,24 @@
 const Product = require("../Models/ProductModule");
 
-// CREATE
+// CREATE PRODUCT
 exports.addproduct = async (req, res) => {
   try {
-    const obj = new Product(req.body);
-    await obj.save();
-    res.status(201).json({ message: "Product Created Successfully" });
+    const exists = await Product.findOne({ pname: req.body.pname });
+    if (exists) {
+      return res.status(400).json({
+        message: "Product with this name already exists",
+      });
+    }
+
+    const product = new Product(req.body);
+    await product.save();
+
+    res.status(201).json({ message: "Product Created Successfully", product });
   } catch (error) {
-    res.status(500).json({ message: "Not created", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 // READ ALL
 exports.getproducts = async (req, res) => {
